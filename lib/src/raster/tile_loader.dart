@@ -11,7 +11,7 @@ import '../../vector_map_tiles.dart';
 import '../extensions.dart';
 import '../grid/slippy_map_translator.dart';
 import '../grid/tile_zoom.dart';
-import '../rendering/tile_renderer.dart';
+import '../rendering/tile_renderer.dart' as r;
 import '../stream/tile_supplier.dart';
 import '../stream/tile_supplier_raster.dart';
 import 'storage_image_cache.dart';
@@ -95,7 +95,7 @@ class TileLoader {
       final translation = translator.specificZoomTranslation(requestedTile,
           zoom: tileResponse.identity.z);
 
-      final renderer = TileRenderer(
+      final renderer = r.TileRenderer(
           theme: _theme,
           textPainterProvider: const DefaultTextPainterProvider(),
           tileState: TileState(

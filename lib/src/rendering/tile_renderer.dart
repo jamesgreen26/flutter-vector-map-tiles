@@ -33,16 +33,21 @@ class TileRenderer {
     tileSizer.apply(canvas);
 
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: theme, painterProvider: textPainterProvider).render(
-        canvas,
-        TileSource(
-            tileset: tileset,
-            rasterTileset: (rasterTileset ?? const RasterTileset(tiles: {})),
-            spriteAtlas: spriteImage,
-            spriteIndex: sprites?.index),
-        clip: tileClip,
-        zoomScaleFactor: tileSizer.effectiveScale,
-        zoom: tileState.zoomDetail,
-        rotation: tileState.rotation);
+    Renderer(
+            theme: theme,
+            painterProvider: textPainterProvider,
+            experimentalGpuRendering: false)
+        .render(
+            canvas,
+            TileSource(
+                tileset: tileset,
+                rasterTileset:
+                    (rasterTileset ?? const RasterTileset(tiles: {})),
+                spriteAtlas: spriteImage,
+                spriteIndex: sprites?.index),
+            clip: tileClip,
+            zoomScaleFactor: tileSizer.effectiveScale,
+            zoom: tileState.zoomDetail,
+            rotation: tileState.rotation);
   }
 }

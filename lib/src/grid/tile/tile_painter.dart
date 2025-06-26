@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../cache/text_cache.dart';
-import '../../rendering/tile_renderer.dart';
+import '../../rendering/tile_renderer.dart' as r;
 import '../../tile_identity.dart';
 import '../grid_tile_positioner.dart';
 import 'symbols.dart';
@@ -41,7 +41,7 @@ class VectorTilePainter extends CustomPainter {
       return;
     }
     ++options.paintCount;
-    final renderer = TileRenderer(
+    final renderer = r.TileRenderer(
         theme: options.theme,
         textPainterProvider: _cachingPainterProvider,
         tileState: tileState,
