@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:vector_tile_renderer/src/gpu/tile_renderer_composite.dart';
 
 import '../grid/grid_tile_positioner.dart';
 import '../grid/slippy_map_translator.dart';
@@ -16,6 +17,7 @@ class TileRenderer {
   final RasterTileset? rasterTileset;
   final Image? spriteImage;
   final SpriteStyle? sprites;
+  TileRendererComposite? composite;
 
   TileRenderer(
       {required this.theme,
@@ -33,21 +35,44 @@ class TileRenderer {
     tileSizer.apply(canvas);
 
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(
-            theme: theme,
-            painterProvider: textPainterProvider,
-            experimentalGpuRendering: false)
-        .render(
-            canvas,
-            TileSource(
-                tileset: tileset,
-                rasterTileset:
-                    (rasterTileset ?? const RasterTileset(tiles: {})),
-                spriteAtlas: spriteImage,
-                spriteIndex: sprites?.index),
-            clip: tileClip,
-            zoomScaleFactor: tileSizer.effectiveScale,
-            zoom: tileState.zoomDetail,
-            rotation: tileState.rotation);
+
+    var composite = this.composite;
+    if (composite == null) {
+      composite = TileRendererComposite(
+          theme: theme.copyWith(
+              types: ThemeLayerType.values
+                  .where((it) => it != ThemeLayerType.symbol)
+                  .toSet()),
+          tile: TileSource(
+              tileset: tileset,
+              rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+              spriteAtlas: spriteImage,
+              spriteIndex: sprites?.index),
+          gpuRenderingEnabled: true,
+          zoom: tileState.zoomDetail,
+          painterProvider: textPainterProvider);
+      this.composite = composite;
+    }
+    composite.render(canvas, size,
+        clip: tileClip,
+        zoomScaleFactor: tileSizer.effectiveScale,
+        rotation: tileState.rotation);
+
+    // Renderer(
+    //         theme: theme,
+    //         painterProvider: textPainterProvider,
+    //         experimentalGpuRendering: false)
+    //     .render(
+    //         canvas,
+    //         TileSource(
+    //             tileset: tileset,
+    //             rasterTileset:
+    //                 (rasterTileset ?? const RasterTileset(tiles: {})),
+    //             spriteAtlas: spriteImage,
+    //             spriteIndex: sprites?.index),
+    //         clip: tileClip,
+    //         zoomScaleFactor: tileSizer.effectiveScale,
+    //         zoom: tileState.zoomDetail,
+    //         rotation: tileState.rotation);
   }
 }

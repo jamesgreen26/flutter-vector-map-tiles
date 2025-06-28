@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
+import 'package:vector_map_tiles_example/local_light_style.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 // ignore: uri_does_not_exist
 import 'api_key.dart';
@@ -86,12 +87,23 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Mapbox - mapbox://styles/mapbox/streets-v12?access_token={key}
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
-  Future<Style> _readStyle() => StyleReader(
-          uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
-          // ignore: undefined_identifier
-          apiKey: mapboxApiKey,
-          logger: const Logger.console())
-      .read();
+  // Future<Style> _readStyle() => StyleReader(
+  //         uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
+  //         // ignore: undefined_identifier
+  //         apiKey: mapboxApiKey,
+  //         logger: const Logger.console())
+  //     .read();
+
+  Future<Style> _readStyle() => Future.value(Style(
+      theme: ThemeReader().read(lightStyle()),
+      providers: TileProviders({
+        'openmaptiles': NetworkVectorTileProvider(
+          urlTemplate:
+              'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf',
+          httpHeaders: {'Authorization': 'Stadia $stadiaMapsApiKey'},
+          maximumZoom: 14,
+        ),
+      })));
 
   Widget _map(Style style) => FlutterMap(
         mapController: _controller,
@@ -106,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
               theme: style.theme,
               sprites: style.sprites,
               maximumZoom: 22,
+              // showTileDebugInfo: true,
               tileOffset: TileOffset.mapbox,
               layerMode: VectorTileLayerMode.vector)
         ],

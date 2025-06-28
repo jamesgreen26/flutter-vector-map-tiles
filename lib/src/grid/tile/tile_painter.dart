@@ -17,6 +17,7 @@ class VectorTilePainter extends CustomPainter {
   final CreatedTextPainterProvider _painterProvider =
       CreatedTextPainterProvider();
   late final CachingTextPainterProvider _cachingPainterProvider;
+  r.TileRenderer? _renderer;
 
   VectorTilePainter(this.options) : super(repaint: options.model) {
     _cachingPainterProvider =
@@ -41,15 +42,23 @@ class VectorTilePainter extends CustomPainter {
       return;
     }
     ++options.paintCount;
-    final renderer = r.TileRenderer(
-        theme: options.theme,
-        textPainterProvider: _cachingPainterProvider,
-        tileState: tileState,
-        translation: translation,
-        tileset: model.tileset!,
-        rasterTileset: model.rasterTileset,
-        spriteImage: model.spriteImage,
-        sprites: model.sprites);
+    var renderer = _renderer;
+    if (renderer == null ||
+        renderer.tileset != model.tileset ||
+        renderer.rasterTileset != model.rasterTileset) {
+      renderer = r.TileRenderer(
+          theme: options.theme,
+          textPainterProvider: _cachingPainterProvider,
+          tileState: tileState,
+          translation: translation,
+          tileset: model.tileset!,
+          rasterTileset: model.rasterTileset,
+          spriteImage: model.spriteImage,
+          sprites: model.sprites);
+      _renderer = renderer;
+    }
+    print(
+        'Rendering tile ${model.tile} at zoom ${model.tileZoomSubstitutionOffset}');
     renderer.render(canvas, size);
     _lastPainted = _PaintMode.vector;
     _lastPaintedId = translation.translated;
