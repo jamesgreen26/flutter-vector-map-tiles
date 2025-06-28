@@ -39,10 +39,7 @@ class TileRenderer {
     var composite = this.composite;
     if (composite == null) {
       composite = TileRendererComposite(
-          theme: theme.copyWith(
-              types: ThemeLayerType.values
-                  .where((it) => it != ThemeLayerType.symbol)
-                  .toSet()),
+          theme: theme,
           tile: TileSource(
               tileset: tileset,
               rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
