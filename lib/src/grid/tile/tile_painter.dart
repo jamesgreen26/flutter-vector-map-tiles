@@ -57,8 +57,6 @@ class VectorTilePainter extends CustomPainter {
           sprites: model.sprites);
       _renderer = renderer;
     }
-    print(
-        'Rendering tile ${model.tile} at zoom ${model.tileZoomSubstitutionOffset}');
     renderer.render(canvas, size);
     _lastPainted = _PaintMode.vector;
     _lastPaintedId = translation.translated;
