@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_scene/scene.dart';
+import 'package:vector_math/vector_math.dart' as vm;
 
 import '../tile_identity.dart';
 import 'constants.dart';
@@ -29,6 +31,30 @@ class GridTilePositioner {
         width: _roundSize(p.width),
         height: _roundSize(p.height),
         child: tileWidget);
+  }
+
+  vm.Matrix4 tileTransformMatrix(TileIdentity tile, Size canvasSize) {
+    final offset = _tileOffset(tile);
+    final toRight = _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
+    final toBottom = _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
+
+    final width = (toRight.dx - offset.dx);
+    final height = (toBottom.dy - offset.dy);
+
+    final centerX = offset.dx + width / 2.0;
+    final centerY = offset.dy + height / 2.0;
+
+    // Convert pixel center to NDC
+    final ndcX = (centerX / canvasSize.width) * 2.0 - 1.0;
+    final ndcY = 1.0 - (centerY / canvasSize.height) * 2.0;
+
+    // Convert size to NDC scale
+    final ndcScaleX = (width / canvasSize.width);
+    final ndcScaleY = (height / canvasSize.height);
+
+    return vm.Matrix4.identity()
+      ..translate(ndcX, ndcY, 0.0)
+      ..scale(ndcScaleX, ndcScaleY, 1.0);
   }
 
   Offset _tileOffset(TileIdentity tile) {
