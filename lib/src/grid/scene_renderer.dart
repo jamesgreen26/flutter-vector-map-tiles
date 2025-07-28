@@ -1,10 +1,10 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_scene/scene.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:vector_math/vector_math.dart' as vm;
-import 'package:vector_tile_dem/vector_tile_dem.dart';
 
 import 'grid_tile_positioner.dart';
 
@@ -50,6 +50,11 @@ class MyPainter extends CustomPainter {
 
       node.localTransform = positioner.tileTransformMatrix(TileIdentity(z, x, y), size);
     });
+
+    final view = ui.PlatformDispatcher.instance.views.first;
+    final pixelRatio = view.display.devicePixelRatio;
+
+    canvas.scale(1 / pixelRatio);
 
     parent.scene.render(_camera, canvas);
   }
