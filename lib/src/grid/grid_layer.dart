@@ -362,6 +362,16 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
 
     final tiles = _tileWidgets.tileManager.tilesToDraw;
 
+    final keys = tiles.map((it) => it.key());
+
+    final nodes = scene.root.children.toList(growable: false);
+
+    for (var node in nodes) {
+      if (!keys.contains(node.name)) {
+        scene.remove(node);
+      }
+    }
+
     for (var tile in tiles) {
       final model = _tileWidgets.tileManager.getModel(tile);
 
