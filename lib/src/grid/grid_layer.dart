@@ -292,6 +292,8 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
 
   final scene = Scene();
 
+  final geometryWorkers = GeometryWorkers();
+
   MapCamera get mapCamera => widget.mapState;
 
   double get zoom => widget.options.mapZoom();
@@ -312,6 +314,9 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
       _update();
     });
     _update();
+    geometryWorkers.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -392,7 +397,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
             zoom: zoom,
           );
 
-          SceneBuildingVisitor(node, visitorContext).visitAllFeatures(model.theme);
+          SceneBuildingVisitor(node, visitorContext, geometryWorkers).visitAllFeatures(model.theme);
 
 
           scene.add(node);
