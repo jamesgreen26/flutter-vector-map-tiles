@@ -286,11 +286,9 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> implements
   late TileWidgets _tileWidgets;
   late final _ZoomScaler zoomScaler;
 
-  final geometryWorkers = GeometryWorkers();
   late final renderer = VectorSceneRenderer(context: this);
   late final sceneTileManager = SceneTileManager(
     scene: renderer.scene,
-    geometryWorkers: geometryWorkers,
     zoomProvider: () => zoom,
   );
 
@@ -314,9 +312,6 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> implements
       _update();
     });
     _update();
-    geometryWorkers.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
