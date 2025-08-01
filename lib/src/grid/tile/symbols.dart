@@ -6,7 +6,7 @@ import 'delay_painter.dart';
 import 'tile_options.dart';
 
 class SymbolsDelayPainterModel extends DelayPainterModel {
-  SymbolsDelayPainterModel(VectorTileModel model)
+  SymbolsDelayPainterModel(TileLifecycleModel model)
       : super(key: model.tile.key(), show: () => model.showLabels) {
     model.addListener(notifyUpdate);
     model.symbolState.addListener(notifyReady);

@@ -6,7 +6,7 @@ import '../tile_model.dart';
 import 'symbols.dart';
 
 class VectorTileOptions {
-  final VectorTileModel model;
+  final TileLifecycleModel model;
   final TextCache textCache;
   final Theme theme;
   final SpriteStyle? sprites;

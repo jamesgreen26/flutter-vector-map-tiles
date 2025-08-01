@@ -18,7 +18,7 @@ class TileLayerModel extends ChangeNotifier {
   Tileset? tileset;
   RasterTileset? rasterTileset;
   TileTranslation? translation;
-  final VectorTileModel tileModel;
+  final TileLifecycleModel tileModel;
   var _disposed = false;
   var visible = true;
   late final ScheduledDebounce debounce;

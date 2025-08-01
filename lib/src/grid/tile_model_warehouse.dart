@@ -14,9 +14,9 @@ import 'tile_zoom.dart';
 /// Manages tile models and determines which tiles to draw without any widget dependencies
 class TileModelWarehouse extends ChangeNotifier {
   bool _disposed = false;
-  Map<TileIdentity, VectorTileModel> _idToModel = {};
-  final List<VectorTileModel> _loadingModels = [];
-  List<VectorTileModel> _substitutionModels = [];
+  Map<TileIdentity, TileLifecycleModel> _idToModel = {};
+  final List<TileLifecycleModel> _loadingModels = [];
+  List<TileLifecycleModel> _substitutionModels = [];
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final ZoomFunction _zoomDetailFunction;
@@ -67,16 +67,16 @@ class TileModelWarehouse extends ChangeNotifier {
   }
 
   /// Gets all current tile models
-  Map<TileIdentity, VectorTileModel> get models => _idToModel;
+  Map<TileIdentity, TileLifecycleModel> get models => _idToModel;
 
   /// Gets tiles that should be drawn (includes substitutions)
   List<TileIdentity> get tilesToDraw => _idToModel.keys.toList();
 
   /// Gets the model for a specific tile
-  VectorTileModel? getModel(TileIdentity tile) => _idToModel[tile];
+  TileLifecycleModel? getModel(TileIdentity tile) => _idToModel[tile];
 
   void _updateModels(TileViewport viewport, List<TileIdentity> tiles) {
-    Map<TileIdentity, VectorTileModel> previousIdToModel = _idToModel;
+    Map<TileIdentity, TileLifecycleModel> previousIdToModel = _idToModel;
     _idToModel = {};
 
     Set<TileIdentity> effectiveTiles = _reduce(tiles);
@@ -98,7 +98,7 @@ class TileModelWarehouse extends ChangeNotifier {
         model = null;
       }
       if (model == null) {
-        model = VectorTileModel(
+        model = TileLifecycleModel(
             _tileProvider,
             _rasterTileProvider,
             _theme,
@@ -196,9 +196,9 @@ class TileModelWarehouse extends ChangeNotifier {
     return reduced;
   }
 
-  List<VectorTileModel> _substitutionTiles(
-          Map<TileIdentity, VectorTileModel> possibleSubstitutions,
-          List<VectorTileModel> loadingModels) =>
+  List<TileLifecycleModel> _substitutionTiles(
+          Map<TileIdentity, TileLifecycleModel> possibleSubstitutions,
+          List<TileLifecycleModel> loadingModels) =>
       possibleSubstitutions.values
           .where((candidate) => candidate.hasData && !candidate.disposed)
           .where((candidate) => loadingModels.any((m) {
@@ -209,7 +209,7 @@ class TileModelWarehouse extends ChangeNotifier {
               }))
           .toList();
 
-  void _removeAndDispose(VectorTileModel obsolete) {
+  void _removeAndDispose(TileLifecycleModel obsolete) {
     _substitutionModels.remove(obsolete);
     _loadingModels.remove(obsolete);
     _idToModel.remove(obsolete.tile);

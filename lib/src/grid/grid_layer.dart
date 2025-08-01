@@ -5,10 +5,11 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:flutter_map/flutter_map.dart' hide TileProvider;
-import 'package:flutter_scene/scene.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vector_map_tiles/src/grid/scene_renderer.dart';
+import 'grid_tile_positioner.dart';
+import 'constants.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
+import 'scene_tile_adapter.dart';
 
 import '../cache/byte_storage_factory.dart';
 import '../cache/caches.dart';
@@ -28,9 +29,7 @@ import '../tile_offset.dart';
 import '../tile_providers.dart';
 import '../tile_viewport.dart';
 import '../vector_tile_layer_mode.dart';
-import 'constants.dart';
 import 'debounce.dart';
-import 'grid_tile_positioner.dart';
 import 'tile/disposable_state.dart';
 import 'tile_widgets.dart';
 
@@ -62,25 +61,22 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Theme? _theme;
   Theme? _symbolTheme;
   fm.TileProvider? _tileProvider;
+  late final ThemeManager _themeManager;
 
   Theme get theme =>
       _theme ??
       (_theme = widget.options.layerMode == VectorTileLayerMode.raster
           ? widget.options.theme
-          : widget.options.theme.copyWith(
-              types: ThemeLayerType.values
-                  .where((it) => it != ThemeLayerType.symbol)
-                  .toSet()));
+          : _themeManager.createNonSymbolTheme(widget.options.theme));
 
   Theme get symbolTheme =>
       _symbolTheme ??
-      (_symbolTheme = widget.options.theme.copyWith(
-          id: '${widget.options.theme.id}-symbols',
-          types: {ThemeLayerType.symbol}));
+      (_symbolTheme = _themeManager.createSymbolTheme(widget.options.theme));
 
   @override
   void initState() {
     super.initState();
+    _themeManager = const DefaultThemeManager();
     _executor = newConcurrentExecutor(concurrency: widget.options.concurrency);
     _createCaches();
     Future.delayed(const Duration(seconds: 3), () {
@@ -285,14 +281,18 @@ class _VectorTileLayer extends StatefulWidget {
   }
 }
 
-class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
+class _VectorTileLayerState extends DisposableState<_VectorTileLayer> implements SceneRenderingContext {
   StreamSubscription<void>? _subscription;
   late TileWidgets _tileWidgets;
   late final _ZoomScaler zoomScaler;
 
-  final scene = Scene();
-
   final geometryWorkers = GeometryWorkers();
+  late final renderer = VectorSceneRenderer(context: this);
+  late final sceneTileManager = SceneTileManager(
+    scene: renderer.scene,
+    geometryWorkers: geometryWorkers,
+    zoomProvider: () => zoom,
+  );
 
   MapCamera get mapCamera => widget.mapState;
 
@@ -361,51 +361,18 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
 
   @override
   Widget build(BuildContext context) {
-
     zoomScaler.updateMapZoomScale(mapCamera.zoom);
 
+    final tiles = _tileWidgets.tileModelWarehouse.tilesToDraw;
 
-    final tiles = _tileWidgets.tileManager.tilesToDraw;
+    // Convert TileIdentity to SceneTileIdentity and update scene using the manager
+    // This replaces the manual scene node management with the abstraction
+    final sceneTiles = tiles.map((tile) => tile.toSceneTileIdentity()).toList();
+    final modelProvider = TileModelWarehouseAdapter(_tileWidgets.tileModelWarehouse);
+    
+    sceneTileManager.updateTiles(sceneTiles, modelProvider);
 
-    final keys = tiles.map((it) => it.key());
-
-    final nodes = scene.root.children.toList(growable: false);
-
-    for (var node in nodes) {
-      if (!keys.contains(node.name)) {
-        scene.remove(node);
-      }
-    }
-
-    for (var tile in tiles) {
-      final model = _tileWidgets.tileManager.getModel(tile);
-
-      var node = scene.root.children.where((it) => it.name == tile.key()).firstOrNull;
-
-      if (model == null || model.disposed || model.tileset == null) {
-        if (node != null) {
-          scene.remove(node);
-        }
-      } else {
-        if (node == null) {
-          node = Node(name: tile.key());
-
-          final visitorContext = VisitorContext(
-            logger: const Logger.noop(),
-            tileSource: TileSource(
-                tileset: model.tileset!, rasterTileset: model.rasterTileset ?? const RasterTileset(tiles: {})),
-            zoom: zoom,
-          );
-
-          SceneBuildingVisitor(node, visitorContext, geometryWorkers).visitAllFeatures(model.theme);
-
-
-          scene.add(node);
-        }
-      }
-    }
-
-    return SceneRenderer(parent: this);
+    return renderer;
   }
 
   void _update() {
@@ -415,6 +382,27 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     setState(() {
       _updateTiles();
     });
+  }
+
+  @override
+  TilePositioner createTilePositioner(int tileZoom) {
+    final state = FlutterTilePositioningState(
+      zoomScaler.zoomScale(tileZoom), 
+      mapCamera, 
+      zoom,
+    );
+    
+    return GridTilePositionerAdapter(
+      GridBasedTilePositioner(
+        tileZoom,
+        TilePositioningParameters(
+          zoomScale: state.zoomScale,
+          origin: state.origin,
+          translate: state.translate,
+          tileSize: tileSize,
+        ),
+      ),
+    );
   }
 
   void _updateTiles() {

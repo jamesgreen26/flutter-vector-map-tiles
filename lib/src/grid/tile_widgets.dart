@@ -15,8 +15,8 @@ import 'tile_zoom.dart';
 
 class TileWidgets extends ChangeNotifier {
   bool _disposed = false;
-  late final TileModelWarehouse _tileManager;
-  late final TileWidgetProvider _widgetManager;
+  late final TileModelWarehouse _tileModelWarehouse;
+  late final TileWidgetProvider _widgetProvider;
 
   TileWidgets(
       ZoomScaleFunction zoomScaleFunction,
@@ -34,7 +34,7 @@ class TileWidgets extends ChangeNotifier {
       int tileZoomSubstitutionOffset,
       bool paintBackground,
       bool showTileDebugInfo) {
-    _tileManager = TileModelWarehouse(
+    _tileModelWarehouse = TileModelWarehouse(
       zoomScaleFunction: zoomScaleFunction,
       zoomFunction: zoomFunction,
       zoomDetailFunction: zoomDetailFunction,
@@ -50,28 +50,24 @@ class TileWidgets extends ChangeNotifier {
       paintBackground: paintBackground,
       showTileDebugInfo: showTileDebugInfo,
     );
-    _widgetManager = TileWidgetProvider(
-      tileManager: _tileManager,
+    _widgetProvider = TileWidgetProvider(
+      tileManager: _tileModelWarehouse,
       textCache: textCache,
     );
-    _tileManager.addListener(_onTileManagerChanged);
+    _tileModelWarehouse.addListener(_onTileManagerChanged);
   }
 
   void update(TileViewport viewport, List<TileIdentity> tiles) {
     if (tiles.isEmpty || _disposed) {
       return;
     }
-    _tileManager.update(viewport, tiles);
+    _tileModelWarehouse.update(viewport, tiles);
   }
 
-  void updateWidgets() {
-    // Widgets are automatically updated through the TileWidgetManager
-  }
-
-  Map<TileIdentity, GridVectorTile> get all => _widgetManager.widgets;
+  Map<TileIdentity, GridVectorTile> get all => _widgetProvider.widgets;
 
   /// Provides access to the underlying tile manager for non-widget use cases
-  TileModelWarehouse get tileManager => _tileManager;
+  TileModelWarehouse get tileModelWarehouse => _tileModelWarehouse;
 
   void _onTileManagerChanged() {
     if (!_disposed) {
@@ -84,9 +80,9 @@ class TileWidgets extends ChangeNotifier {
     if (!_disposed) {
       super.dispose();
       _disposed = true;
-      _tileManager.removeListener(_onTileManagerChanged);
-      _tileManager.dispose();
-      _widgetManager.dispose();
+      _tileModelWarehouse.removeListener(_onTileManagerChanged);
+      _tileModelWarehouse.dispose();
+      _widgetProvider.dispose();
     }
   }
 

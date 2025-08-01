@@ -6,7 +6,7 @@ import 'tile_model.dart';
 
 class TileLayerComposer {
   List<TileLayerModel> compose(
-      VectorTileModel vectorTileModel, Theme theme, SpriteStyle? sprites) {
+      TileLifecycleModel vectorTileModel, Theme theme, SpriteStyle? sprites) {
     final layersByGroupId = <String, _Layer>{};
     var groupSeed = 0;
     String? currentGroupId;

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
-import 'package:vector_tile_renderer/src/gpu/tile_renderer_composite.dart';
 
 import '../grid/grid_tile_positioner.dart';
 import '../grid/slippy_map_translator.dart';
@@ -17,6 +16,7 @@ class TileRenderer {
   final RasterTileset? rasterTileset;
   final Image? spriteImage;
   final SpriteStyle? sprites;
+  final TileRendererFactory rendererFactory;
   TileRendererComposite? composite;
 
   TileRenderer(
@@ -27,7 +27,9 @@ class TileRenderer {
       required this.tileset,
       required this.rasterTileset,
       required this.spriteImage,
-      required this.sprites});
+      required this.sprites,
+      TileRendererFactory? rendererFactory})
+      : rendererFactory = rendererFactory ?? const DefaultTileRendererFactory();
 
   void render(Canvas canvas, Size size) {
     final tileSizer = GridTileSizer(translation, tileState.zoomScale, size);
@@ -38,9 +40,9 @@ class TileRenderer {
 
     var composite = this.composite;
     if (composite == null) {
-      composite = TileRendererComposite(
+      composite = rendererFactory.createRenderer(
           theme: theme,
-          tile: TileSource(
+          tileSource: TileSource(
               tileset: tileset,
               rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
               spriteAtlas: spriteImage,

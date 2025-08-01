@@ -15,7 +15,7 @@ import 'tile_layer_composer.dart';
 import 'tile_layer_model.dart';
 import 'tile_zoom.dart';
 
-class VectorTileModel extends ChangeNotifier {
+class TileLifecycleModel extends ChangeNotifier {
   bool _disposed = false;
 
   bool get disposed => _disposed;
@@ -45,7 +45,7 @@ class VectorTileModel extends ChangeNotifier {
   final symbolState = VectorTileSymbolState();
   late final List<TileLayerModel> layers;
 
-  VectorTileModel(
+  TileLifecycleModel(
       this.tileProvider,
       this.rasterTileProvider,
       this.theme,
@@ -73,7 +73,7 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   void startLoading() {
-    _VectorTileModelLoader(this).startLoading();
+    _TileLifecycleModelLoader(this).startLoading();
   }
 
   void _receiveTile(TileResponse received, RasterTileset rasterTileset,
@@ -181,10 +181,10 @@ class VectorTileSymbolState extends ChangeNotifier {
   }
 }
 
-class _VectorTileModelLoader {
-  final VectorTileModel model;
+class _TileLifecycleModelLoader {
+  final TileLifecycleModel model;
 
-  _VectorTileModelLoader(this.model);
+  _TileLifecycleModelLoader(this.model);
 
   void startLoading() async {
     final spriteImage = await model.spriteAtlasProvider?.call();

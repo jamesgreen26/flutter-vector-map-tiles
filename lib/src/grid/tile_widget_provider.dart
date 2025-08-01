@@ -39,7 +39,7 @@ class TileWidgetProvider {
     _idToWidget = idToWidget;
   }
 
-  GridVectorTile _createWidget(VectorTileModel model) {
+  GridVectorTile _createWidget(TileLifecycleModel model) {
     final tile = model.tile;
     return GridVectorTile(
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${model.theme.id}'),

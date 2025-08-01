@@ -22,7 +22,6 @@ dependencies:
   executor_lib: ^1.1.1
     #path: ../executor_lib
   idb_shim: ^2.6.1+7
-  flutter_scene: ^0.9.2-0
   vector_math: ^2.1.4
 
 

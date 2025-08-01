@@ -13,7 +13,7 @@ import 'tile_layer_model.dart';
 import 'tile_model.dart';
 
 class GridVectorTile extends material.StatefulWidget {
-  final VectorTileModel model;
+  final TileLifecycleModel model;
   final TextCache textCache;
 
   const GridVectorTile(
