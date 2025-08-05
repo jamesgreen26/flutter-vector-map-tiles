@@ -312,6 +312,9 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> implements
       _update();
     });
     _update();
+    sceneTileManager.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
