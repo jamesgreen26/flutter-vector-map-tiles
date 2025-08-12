@@ -63,11 +63,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   fm.TileProvider? _tileProvider;
   late final ThemeManager _themeManager;
 
-  Theme get theme =>
-      _theme ??
-      (_theme = widget.options.layerMode == VectorTileLayerMode.raster
-          ? widget.options.theme
-          : _themeManager.createNonSymbolTheme(widget.options.theme));
+  Theme get theme => widget.options.theme;
 
   Theme get symbolTheme =>
       _symbolTheme ??
