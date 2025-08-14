@@ -283,13 +283,11 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> implements
   late final _ZoomScaler zoomScaler;
 
   late final renderer = VectorSceneRenderer(context: this);
-  late final sceneTileManager = SceneTileManager(
-    scene: renderer.scene,
-    zoomProvider: () => zoom,
-  );
+  late final sceneTileManager = renderer.sceneTileManager;
 
   MapCamera get mapCamera => widget.mapState;
 
+  @override
   double get zoom => widget.options.mapZoom();
 
   double get _detailZoom =>
