@@ -60,11 +60,11 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       final theme = widget.mapProperties.theme;
 
       final preRenderData = tileset.tiles.values
-          .fold(<String, Uint8List>{}, (a, b) => a..addAll(b.prerenderData));
+          .fold(<Map<String, Uint8List>>[], (a, b) => a..add(b.prerenderData));
 
       final remainingTheme = Theme(
           layers: theme.layers
-              .where((layer) => !preRenderData.keys.contains(layer.id))
+              .where((layer) => tilesRenderer.isPreRenderLayer(layer.type))
               .toList(),
           id: theme.id,
           version: theme.version);
@@ -86,7 +86,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
           .then((renderData) {
         try {
           tile.renderData = [
-            preRenderData,
+            ...preRenderData,
             renderData.map((k, v) => MapEntry(k, v.materialize().asUint8List()))
           ];
         } catch (_) {}
