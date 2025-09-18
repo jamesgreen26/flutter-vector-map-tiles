@@ -29,7 +29,8 @@ class VectorTileTransform {
     Uint8List bytes,
     TileTranslation translation,
     bool Function() cancelled,
-    String source, TileOffset tileOffset,
+    String source,
+    TileOffset tileOffset,
   ) async {
     final themeId = theme.id;
     if (!themeRepo.isThemeReady(themeId)) {
@@ -47,8 +48,7 @@ class VectorTileTransform {
             bytes: TransferableTypedData.fromList([bytes]),
             translation: translation,
             source: source,
-            tileOffset: tileOffset
-        ),
+            tileOffset: tileOffset),
         cancelled: cancelled,
         deduplicationKey: deduplicationKey,
       ),
@@ -91,6 +91,7 @@ Tile _apply(_TransformInput input) {
   final zoom = input.translation.original.z.toDouble();
 
   final optimized = theme.optimizeTile(tile, zoom);
-  optimized.earlyPreRender(theme, zoom, input.tileOffset.zoomOffset, input.source);
+  optimized.earlyPreRender(
+      theme, zoom, input.tileOffset.zoomOffset, input.source);
   return optimized;
 }

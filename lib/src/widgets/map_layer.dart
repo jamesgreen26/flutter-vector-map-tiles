@@ -72,7 +72,13 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       final optimizedTileset = Tileset(tileset.tiles.map((key, value) =>
           MapEntry(key, remainingTheme.optimizeTile(value, zoom))));
 
-      final jobArguments = (theme.id, zoom, optimizedTileset, tileID, widget.mapProperties.tileOffset.zoomOffset);
+      final jobArguments = (
+        theme.id,
+        zoom,
+        optimizedTileset,
+        tileID,
+        widget.mapProperties.tileOffset.zoomOffset
+      );
 
       await tilesRenderer.preRenderUi(zoom, tileset, tileID);
       await executor
