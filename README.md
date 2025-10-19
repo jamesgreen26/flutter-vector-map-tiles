@@ -4,6 +4,10 @@ A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables 
 
 Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them as a layer on a `flutter_map`.
 
+See it in action on YouTube:
+
+[![vector_map_tiles 10 on YouTube](video_thumbnail.jpg)](https://www.youtube.com/watch?v=ghPRZzPrrGQ)
+
 ## Flutter GPU Preview
 
 This version of vector_map_tiles has a new rendering backend which makes use of ``flutter_gpu`` to achieve better performance. 
@@ -27,27 +31,13 @@ See the [gallery](gallery/gallery.md) for more examples.
 
 ## Installing
 
-Setup instructions have changed for the purposes of the 10.0.0 preview. Once released, it will be available on pub.dev.
+Install vector_map_tiles from [pub.dev](https://pub.dev/packages/vector_map_tiles). Then, **if using vector_map_tiles version 10 or higher** follow the steps below.
 
-**Note**: After pulling new commits, run `flutter clean && flutter pub get` in the main folder of the Flutter app (e.g. `./example`) to ensure that shaders are recompiled with the latest changes.
+**Note**: After updating this dependency, run `flutter clean && flutter pub get` in the main folder of the Flutter app (e.g. `./example`) to ensure that shaders are recompiled with the latest changes.
 
 ### Steps
 
-vector_map_tiles depends on vector_tile_renderer. To set this up, run:
-```shell
-git clone git@github.com:greensopinion/flutter-vector-map-tiles.git vector_map_tiles
-git clone git@github.com:greensopinion/dart-vector-tile-renderer.git vector_tile_renderer
-
-cd vector_map_tiles
-git checkout -b 10.0.0 origin/10.0.0
-cd ..
-
-cd vector_tile_renderer
-git checkout -b 7.0.0 origin/7.0.0
-cd ..
-```
-
-This version of vector_map_tiles also depends on``flutter_gpu``, which is currently available on the main flutter channel. To setup, run:
+This version of vector_map_tiles depends on``flutter_gpu``, which is currently available on the main flutter channel. To setup, run:
 
 ```shell
 flutter channel main && flutter upgrade
