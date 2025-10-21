@@ -77,5 +77,9 @@ Tile _apply(_TransformInput input) {
   final translated = TranslationApplier(
     tileSize: input.tileSize,
   ).apply(tileData, input.translation);
-  return translated.toTile();
+
+  final tile = translated.toTile();
+  final zoom = input.translation.original.z.toDouble();
+
+  return theme.optimizeTile(tile, zoom);
 }
