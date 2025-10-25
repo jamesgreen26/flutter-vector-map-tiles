@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Image;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -24,6 +25,8 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   late final TilesRenderer tilesRenderer;
   var _ready = false;
   List<String> _previousTileKeys = [];
+
+  Image? loadedSpriteAtlas;
 
   @override
   void initState() {
@@ -93,7 +96,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
         .where((it) => it.isDisplayReady)
         .toList(growable: false);
     final uiTiles =
-        tileModels.map((it) => it.toUiModel()).toList(growable: false);
+        tileModels.map((it) => it.toUiModel(widget.mapProperties.sprites, loadedSpriteAtlas)).toList(growable: false);
 
     final currentTileKeys = uiTiles.map((it) => it.tileId.key()).toList();
     if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
@@ -120,8 +123,9 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     return setA.length == setB.length && setA.containsAll(setB);
   }
 
-  FutureOr _initialized(void value) {
+  FutureOr _initialized(void value) async {
     if (mounted) {
+      loadedSpriteAtlas = await (spriteAtlas!);
       setState(() {
         _ready = true;
       });
@@ -146,11 +150,15 @@ class MapTilesPainter extends CustomPainter {
 }
 
 extension _TileDataModelUiExtension on TileDataModel {
-  TileUiModel toUiModel() => TileUiModel(
+  TileUiModel toUiModel(SpriteStyle? sprites, Image? spriteAtlas) => TileUiModel(
         tileId: tile.toTileId(),
         position: tilePosition.position,
-        tileset: tileset ?? Tileset({}),
-        rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+        tileSource: TileSource(
+            tileset: tileset ?? Tileset({}),
+            rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+            spriteIndex: sprites?.index,
+            spriteAtlas: spriteAtlas,
+        ),
         renderData: renderData,
       );
 }

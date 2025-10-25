@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: VectorTileLayer(
               tileProviders: style!.providers,
               theme: style!.theme,
+              sprites: style!.sprites,
               tileOffset: TileOffset.DEFAULT,
             ),
           ),
