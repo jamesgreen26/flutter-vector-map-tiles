@@ -114,7 +114,7 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
   void initState() {
     super.initState();
 
-    spriteAtlas =  Future.sync(() async  {
+    spriteAtlas = Future.sync(() async {
       var bytes = await widget.mapProperties.sprites?.atlasProvider.call();
       if (bytes == null) {
         return null;

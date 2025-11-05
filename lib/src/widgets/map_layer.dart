@@ -95,8 +95,10 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     final tileModels = mapTiles.tileModels
         .where((it) => it.isDisplayReady)
         .toList(growable: false);
-    final uiTiles =
-        tileModels.map((it) => it.toUiModel(widget.mapProperties.sprites, loadedSpriteAtlas)).toList(growable: false);
+    final uiTiles = tileModels
+        .map((it) =>
+            it.toUiModel(widget.mapProperties.sprites, loadedSpriteAtlas))
+        .toList(growable: false);
 
     final currentTileKeys = uiTiles.map((it) => it.tileId.key()).toList();
     if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
@@ -150,14 +152,15 @@ class MapTilesPainter extends CustomPainter {
 }
 
 extension _TileDataModelUiExtension on TileDataModel {
-  TileUiModel toUiModel(SpriteStyle? sprites, Image? spriteAtlas) => TileUiModel(
+  TileUiModel toUiModel(SpriteStyle? sprites, Image? spriteAtlas) =>
+      TileUiModel(
         tileId: tile.toTileId(),
         position: tilePosition.position,
         tileSource: TileSource(
-            tileset: tileset ?? Tileset({}),
-            rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
-            spriteIndex: sprites?.index,
-            spriteAtlas: spriteAtlas,
+          tileset: tileset ?? Tileset({}),
+          rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+          spriteIndex: sprites?.index,
+          spriteAtlas: spriteAtlas,
         ),
         renderData: renderData,
       );
