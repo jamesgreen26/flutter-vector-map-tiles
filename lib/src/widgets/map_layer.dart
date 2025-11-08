@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
+import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart' hide Image;
@@ -56,8 +57,22 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     return super.preRender(tile).then((_) async {
       final tileset = tile.tileset ?? Tileset({});
       final tileID = tile.tile.key();
-      final jobArguments =
-          (widget.mapProperties.theme.id, zoom, tileset, tileID);
+      final theme = widget.mapProperties.theme;
+
+      final preRenderData = tileset.tiles.values
+          .fold(<String, Uint8List>{}, (a, b) => a..addAll(b.prerenderData));
+
+      final remainingTheme = Theme(
+          layers: theme.layers
+              .where((layer) => !preRenderData.keys.contains(layer.id))
+              .toList(),
+          id: theme.id,
+          version: theme.version);
+
+      final optimizedTileset = Tileset(tileset.tiles.map((key, value) =>
+          MapEntry(key, remainingTheme.optimizeTile(value, zoom))));
+
+      final jobArguments = (theme.id, zoom, optimizedTileset, tileID);
 
       await tilesRenderer.preRenderUi(zoom, tileset, tileID);
       await executor
@@ -70,19 +85,23 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       ))
           .then((renderData) {
         try {
-          tile.renderData ??= renderData.materialize().asUint8List();
+          tile.renderData = [
+            preRenderData,
+            renderData.map((k, v) => MapEntry(k, v.materialize().asUint8List()))
+          ];
         } catch (_) {}
       });
     });
   }
 
-  TransferableTypedData Function((String, double, Tileset, String) args)
-      _preRender() {
+  Map<String, TransferableTypedData> Function(
+      (String, double, Tileset, String) args) _preRender() {
     final preRenderer = tilesRenderer.getPreRenderer();
     return ((String, double, Tileset, String) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
-      return TransferableTypedData.fromList(
-          [preRenderer.call(theme, args.$2, args.$3, args.$4)]);
+      return preRenderer
+          .call(theme, args.$2, args.$3, args.$4)
+          .map((k, v) => MapEntry(k, TransferableTypedData.fromList([v])));
     };
   }
 

@@ -28,6 +28,7 @@ class VectorTileTransform {
     Uint8List bytes,
     TileTranslation translation,
     bool Function() cancelled,
+    String source,
   ) async {
     final themeId = theme.id;
     if (!themeRepo.isThemeReady(themeId)) {
@@ -35,20 +36,21 @@ class VectorTileTransform {
     }
     final deduplicationKey =
         '${theme.id}-${theme.version}-${translation.original.key()}-${translation.translated.key()}-${translation.xOffset}-${translation.yOffset}';
-    return await executor.submit(
+    final tile = await executor.submit(
       Job(
         deduplicationKey,
         _apply,
         _TransformInput(
-          themeId: theme.id,
-          tileSize: tileSize,
-          bytes: TransferableTypedData.fromList([bytes]),
-          translation: translation,
-        ),
+            themeId: theme.id,
+            tileSize: tileSize,
+            bytes: TransferableTypedData.fromList([bytes]),
+            translation: translation,
+            source: source),
         cancelled: cancelled,
         deduplicationKey: deduplicationKey,
       ),
     );
+    return tile.materialize();
   }
 }
 
@@ -57,12 +59,14 @@ class _TransformInput {
   final TransferableTypedData bytes;
   final double tileSize;
   final TileTranslation translation;
+  final String source;
 
   _TransformInput({
     required this.themeId,
     required this.bytes,
     required this.tileSize,
     required this.translation,
+    required this.source,
   });
 }
 
@@ -81,5 +85,7 @@ Tile _apply(_TransformInput input) {
   final tile = translated.toTile();
   final zoom = input.translation.original.z.toDouble();
 
-  return theme.optimizeTile(tile, zoom);
+  final optimized = theme.optimizeTile(tile, zoom);
+  optimized.earlyPreRender(theme, zoom, input.source);
+  return optimized;
 }
