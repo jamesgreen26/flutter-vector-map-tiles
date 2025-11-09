@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
               tileProviders: style!.providers,
               theme: style!.theme,
               sprites: style!.sprites,
-              tileOffset: TileOffset.DEFAULT,
+              tileOffset: TileOffset.mapbox,
             ),
           ),
           const MapInfo(),
