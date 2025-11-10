@@ -85,7 +85,7 @@ class VectorTileLoader {
       throw CancellationException();
     }
     final transformed =
-        await transform.apply(bytes, translation, cancelled, source);
+        await transform.apply(bytes, translation, cancelled, source, mapProperties.tileOffset);
     return _SourceTile(source: source, tile: transformed);
   }
 }

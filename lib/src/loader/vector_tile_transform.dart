@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/tile_offset.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_translation.dart';
@@ -28,7 +29,7 @@ class VectorTileTransform {
     Uint8List bytes,
     TileTranslation translation,
     bool Function() cancelled,
-    String source,
+    String source, TileOffset tileOffset,
   ) async {
     final themeId = theme.id;
     if (!themeRepo.isThemeReady(themeId)) {
@@ -45,7 +46,9 @@ class VectorTileTransform {
             tileSize: tileSize,
             bytes: TransferableTypedData.fromList([bytes]),
             translation: translation,
-            source: source),
+            source: source,
+            tileOffset: tileOffset
+        ),
         cancelled: cancelled,
         deduplicationKey: deduplicationKey,
       ),
@@ -60,6 +63,7 @@ class _TransformInput {
   final double tileSize;
   final TileTranslation translation;
   final String source;
+  final TileOffset tileOffset;
 
   _TransformInput({
     required this.themeId,
@@ -67,6 +71,7 @@ class _TransformInput {
     required this.tileSize,
     required this.translation,
     required this.source,
+    required this.tileOffset,
   });
 }
 
@@ -86,6 +91,6 @@ Tile _apply(_TransformInput input) {
   final zoom = input.translation.original.z.toDouble();
 
   final optimized = theme.optimizeTile(tile, zoom);
-  optimized.earlyPreRender(theme, zoom, input.source);
+  optimized.earlyPreRender(theme, zoom, input.tileOffset.zoomOffset, input.source);
   return optimized;
 }

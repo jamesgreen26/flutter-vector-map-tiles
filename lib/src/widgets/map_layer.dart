@@ -72,7 +72,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       final optimizedTileset = Tileset(tileset.tiles.map((key, value) =>
           MapEntry(key, remainingTheme.optimizeTile(value, zoom))));
 
-      final jobArguments = (theme.id, zoom, optimizedTileset, tileID);
+      final jobArguments = (theme.id, zoom, optimizedTileset, tileID, widget.mapProperties.tileOffset.zoomOffset);
 
       await tilesRenderer.preRenderUi(zoom, tileset, tileID);
       await executor
@@ -95,12 +95,12 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   }
 
   Map<String, TransferableTypedData> Function(
-      (String, double, Tileset, String) args) _preRender() {
+      (String, double, Tileset, String, int) args) _preRender() {
     final preRenderer = tilesRenderer.getPreRenderer();
-    return ((String, double, Tileset, String) args) {
+    return ((String, double, Tileset, String, int) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
       return preRenderer
-          .call(theme, args.$2, args.$3, args.$4)
+          .call(theme, args.$2, args.$3, args.$4, args.$5)
           .map((k, v) => MapEntry(k, TransferableTypedData.fromList([v])));
     };
   }
